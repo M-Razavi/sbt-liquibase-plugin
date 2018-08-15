@@ -18,9 +18,8 @@ Add the following to your `project/plugins.sbt`:
 Add the following to your 'build.sbt' ( if you are using build.sbt )
 
 
-    import com.github.sbtliquibase.SbtLiquibase
+    lazy val `playtestprh` = (project in file(".")).enablePlugins(SbtLiquibase)
     
-    enablePlugins(SbtLiquibase)
     
     liquibaseUsername := ""
 
