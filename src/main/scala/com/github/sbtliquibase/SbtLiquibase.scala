@@ -50,6 +50,7 @@ object Import {
   val liquibaseOutputDefaultCatalog = SettingKey[Boolean]("liquibase-output-default-catalog", "Whether to ignore the schema name.")
   val liquibaseOutputDefaultSchema = SettingKey[Boolean]("liquibase-output-default-schema", "Whether to ignore the schema name.")
 
+
   lazy val liquibaseInstance = TaskKey[() => Liquibase]("liquibase", "liquibase object")
 }
 
@@ -67,7 +68,11 @@ object SbtLiquibase extends AutoPlugin {
 
   implicit class RichLiquibase(val liquibase: Liquibase) extends AnyVal {
     def execAndClose(f: (Liquibase) => Unit): Unit = {
-      try { f(liquibase) } finally { liquibase.getDatabase.close() }
+      try {
+        f(liquibase)
+      } finally {
+        liquibase.getDatabase.close()
+      }
     }
   }
 
@@ -101,7 +106,7 @@ object SbtLiquibase extends AutoPlugin {
           liquibaseDefaultSchemaName.value.orNull,
           false, // outputDefaultCatalog
           true, // outputDefaultSchema
-          null, // databaseClass
+          null, //liquibaseClassPath.value, // databaseClass
           null, // driverPropertiesFile
           null, // propertyProviderClass
           liquibaseChangelogCatalog.value.orNull,
@@ -189,7 +194,7 @@ object SbtLiquibase extends AutoPlugin {
   }
 
   def generateChangeLog = {
-    ( streams, liquibaseInstance, liquibaseChangelog, liquibaseDefaultCatalog, liquibaseDefaultSchemaName,
+    (streams, liquibaseInstance, liquibaseChangelog, liquibaseDefaultCatalog, liquibaseDefaultSchemaName,
       liquibaseChangelogCatalog, liquibaseChangelogSchemaName,
       liquibaseOutputDefaultCatalog, liquibaseOutputDefaultSchema, liquibaseDataDir) map {
       (out, liquibase, clog, defaultCatalog, defaultSchemaName,
@@ -207,7 +212,9 @@ object SbtLiquibase extends AutoPlugin {
             null, // context
             dataDir.absolutePath,
             new DiffOutputControl())
-        } finally { instance.getDatabase.close() }
+        } finally {
+          instance.getDatabase.close()
+        }
     }
   }
 }
